@@ -1,103 +1,64 @@
-import Image from "next/image";
+"use client";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
 
 export default function Home() {
-  return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm/6 text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-[family-name:var(--font-geist-mono)] font-semibold">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+  const router = useRouter();
+  const [view, setView] = useState<"login" | "register">("login");
+  // Hardcoded reviews
+  const reviews = [
+    { user: "Alice", rating: 5, text: "Amazing tool! Helped me a lot." },
+    { user: "Bob", rating: 4, text: "Very useful and easy to use." },
+    { user: "Charlie", rating: 5, text: "Best writing assistant ever!" },
+  ];
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+  function handleGoogleSignIn() {
+    // Simulate login
+    setTimeout(() => router.push("/editor"), 800);
+  }
+
+  return (
+    <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-blue-100 to-purple-200 relative">
+      {/* Reviews background */}
+      <div className="absolute inset-0 flex flex-col justify-end items-center pointer-events-none select-none z-0">
+        <div className="mb-16 flex gap-6">
+          {reviews.map((r, i) => (
+            <div key={i} className="backdrop-blur-md bg-white/40 rounded-2xl shadow-lg px-6 py-4 w-64 border border-white/30">
+              <div className="flex items-center gap-2 mb-1">
+                <span className="font-bold text-gray-700">{r.user}</span>
+                <span className="text-yellow-400">{'★'.repeat(r.rating)}</span>
+              </div>
+              <div className="text-gray-600 text-sm">{r.text}</div>
+            </div>
+          ))}
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
+      </div>
+      {/* Glassy box */}
+      <div className="relative z-10 flex flex-col items-center justify-center bg-white/40 backdrop-blur-xl rounded-3xl shadow-2xl p-10 w-full max-w-md border border-white/30">
+        <h1 className="text-3xl font-extrabold mb-6 text-gray-800 drop-shadow">Writing Buddy</h1>
+        <div className="flex gap-4 mb-6">
+          <button
+            className={`px-6 py-2 rounded-xl font-semibold transition-all ${view === "login" ? "bg-blue-500 text-white shadow" : "bg-white/60 text-blue-700"}`}
+            onClick={() => setView("login")}
+          >
+            Login
+          </button>
+          <button
+            className={`px-6 py-2 rounded-xl font-semibold transition-all ${view === "register" ? "bg-purple-500 text-white shadow" : "bg-white/60 text-purple-700"}`}
+            onClick={() => setView("register")}
+          >
+            Register
+          </button>
+        </div>
+        <button
+          onClick={handleGoogleSignIn}
+          className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-pink-500 to-blue-500 text-white font-bold py-3 rounded-2xl shadow-lg hover:scale-105 transition-all mb-2"
         >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><g id="SVGRepo_bgCarrier" strokeWidth="0"></g><g id="SVGRepo_tracerCarrier" strokeLinecap="round" strokeLinejoin="round"></g><g id="SVGRepo_iconCarrier"><path d="M21.805 10.023h-9.765v3.977h5.617c-.242 1.242-1.484 3.648-5.617 3.648-3.383 0-6.148-2.797-6.148-6.25s2.765-6.25 6.148-6.25c1.93 0 3.227.82 3.969 1.523l2.719-2.648c-1.711-1.594-3.93-2.574-6.688-2.574-5.523 0-10 4.477-10 10s4.477 10 10 10c5.742 0 9.547-4.031 9.547-9.719 0-.656-.07-1.156-.156-1.457z" fill="#4285F4"></path><path d="M3.152 7.548l3.281 2.406c.891-1.719 2.422-2.797 4.172-2.797 1.18 0 2.031.477 2.5.875l3.047-2.969c-1.383-1.281-3.164-2.063-5.547-2.063-3.672 0-6.75 2.406-7.867 5.719z" fill="#34A853"></path><path d="M12 22c2.43 0 4.469-.805 5.953-2.188l-3.438-2.805c-.953.672-2.242 1.141-3.516 1.141-2.734 0-5.055-1.844-5.891-4.344l-3.32 2.563c1.617 3.281 5.055 5.633 10.212 5.633z" fill="#FBBC05"></path><path d="M21.805 10.023h-9.765v3.977h5.617c-.242 1.242-1.484 3.648-5.617 3.648-3.383 0-6.148-2.797-6.148-6.25s2.765-6.25 6.148-6.25c1.93 0 3.227.82 3.969 1.523l2.719-2.648c-1.711-1.594-3.93-2.574-6.688-2.574-5.523 0-10 4.477-10 10s4.477 10 10 10c5.742 0 9.547-4.031 9.547-9.719 0-.656-.07-1.156-.156-1.457z" fill="none"></path></g></svg>
+          Sign in with Google
+        </button>
+        <div className="text-xs text-gray-500 mt-2">(Mocked sign-in, no real authentication)</div>
+      </div>
     </div>
   );
 }
