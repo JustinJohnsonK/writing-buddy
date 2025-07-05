@@ -9,29 +9,20 @@ export default function EditorPage() {
   const [suggestions, setSuggestions] = useState<any[]>([]);
 
   function handleReview() {
-    // Simulate API call
     setReviewed(false);
     setTimeout(() => {
-      // Fake suggestion: replace 'bad' with 'good'
-      const regex = /bad/gi;
-      let match;
+      // Highlight only the first word (yellow), then show the same word again (green), then the rest (no highlight)
+      const match = input.match(/\S+/);
       let result = [];
-      let lastIndex = 0;
-      let idx = 0;
-      while ((match = regex.exec(input))) {
-        result.push({
-          type: "original",
-          text: input.slice(lastIndex, match.index),
-        });
-        result.push({
-          type: "suggestion",
-          text: "good",
-          original: match[0],
-          id: idx++,
-        });
-        lastIndex = match.index + match[0].length;
+      if (match) {
+        const firstWord = match[0];
+        const rest = input.slice(firstWord.length);
+        result.push({ type: "original", text: firstWord }); // yellow
+        result.push({ type: "suggestion", text: firstWord, id: 0 }); // green
+        result.push({ type: "plain", text: rest }); // no highlight
+      } else {
+        result.push({ type: "plain", text: input });
       }
-      result.push({ type: "original", text: input.slice(lastIndex) });
       setSuggestions(result);
       setReviewed(true);
     }, 1200);
