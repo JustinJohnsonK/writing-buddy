@@ -1,11 +1,14 @@
 "use client";
 import { useState, useRef } from "react";
+import { getFirebaseAuth } from "../lib/firebase";
+import { signInWithPopup, GoogleAuthProvider } from "firebase/auth";
 
 export function ReviewResult({ input, suggestions, onBack }: { input: string; suggestions: any[]; onBack: () => void }) {
   // Track accept/reject/modify state for each suggestion
   const [results, setResults] = useState(suggestions);
   const [modifyIdx, setModifyIdx] = useState<number | null>(null);
   const [modifyText, setModifyText] = useState("");
+  const [modifying, setModifying] = useState(false);
   const dropdownRef = useRef<HTMLDivElement | null>(null);
   const [dropdownIdx, setDropdownIdx] = useState<number | null>(null);
 
@@ -45,11 +48,57 @@ export function ReviewResult({ input, suggestions, onBack }: { input: string; su
     setModifyIdx(idx);
     setModifyText(results[idx].text);
   }
-  function handleModifySubmit() {
+
+  async function getIdTokenOrSignIn() {
+    const auth = getFirebaseAuth();
+    if (!auth.currentUser) {
+      const provider = new GoogleAuthProvider();
+      await signInWithPopup(auth, provider);
+    }
+    return auth.currentUser ? await auth.currentUser.getIdToken() : null;
+  }
+
+  async function handleModifySubmit() {
     if (modifyIdx !== null) {
-      setResults(results.map((s, i) => (i === modifyIdx ? { ...s, text: modifyText, accepted: true, modified: true } : s)));
-      setModifyIdx(null);
-      setModifyText("");
+      setModifying(true);
+      try {
+        const idToken = await getIdTokenOrSignIn();
+        if (!idToken) throw new Error("Authentication failed");
+        // Find the original/yellow for this green
+        let start = 0, end = 0, original = input;
+        for (let i = modifyIdx - 1; i >= 0; i--) {
+          if (results[i].type === "original") {
+            start = original.indexOf(results[i].text);
+            end = start + results[i].text.length;
+            break;
+          }
+        }
+        const res = await fetch("http://localhost:55000/api/modify", {
+          method: "POST",
+          headers: {
+            "Authorization": `Bearer ${idToken}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            original,
+            suggested: results[modifyIdx].text,
+            start,
+            end,
+            user_prompt: modifyText,
+          }),
+        });
+        if (!res.ok) throw new Error("API error");
+        const data = await res.json();
+        setResults(results.map((s, i) =>
+          i === modifyIdx ? { ...s, text: data.suggested, modified: true } : s
+        ));
+        setModifyIdx(null);
+        setModifyText("");
+      } catch (e) {
+        alert("Failed to modify: " + (e as Error).message);
+      } finally {
+        setModifying(false);
+      }
     }
   }
   function handleDropdown(idx: number) {
@@ -103,14 +152,16 @@ export function ReviewResult({ input, suggestions, onBack }: { input: string; su
               maxLength={200}
               value={modifyText}
               onChange={e => setModifyText(e.target.value)}
+              disabled={modifying}
             />
             <button
-              className="w-full py-2 rounded-xl bg-purple-500 text-white font-bold shadow hover:bg-purple-600 transition mb-2"
+              className="w-full py-2 rounded-xl bg-purple-500 text-white font-bold shadow hover:bg-purple-600 transition mb-2 disabled:opacity-50"
               onClick={handleModifySubmit}
+              disabled={modifying}
             >
-              Modify
+              {modifying ? "Modifying..." : "Modify"}
             </button>
-            <button className="text-xs text-purple-700 underline" onClick={() => setModifyIdx(null)}>Cancel</button>
+            <button className="text-xs text-purple-700 underline" onClick={() => setModifyIdx(null)} disabled={modifying}>Cancel</button>
           </div>
         </div>
       )}

@@ -2,30 +2,62 @@
 import { useState } from "react";
 import { UserProfileDropdown } from "../../components/UserProfileDropdown";
 import { ReviewResult } from "../../components/ReviewResult";
+import { getFirebaseAuth } from "../../lib/firebase";
+import { signInWithPopup, GoogleAuthProvider } from "firebase/auth";
 
 export default function EditorPage() {
   const [input, setInput] = useState("");
   const [reviewed, setReviewed] = useState(false);
   const [suggestions, setSuggestions] = useState<any[]>([]);
+  const [loading, setLoading] = useState(false);
 
-  function handleReview() {
+  async function getIdTokenOrSignIn() {
+    const auth = getFirebaseAuth();
+    if (!auth.currentUser) {
+      // Prompt Google sign-in
+      const provider = new GoogleAuthProvider();
+      await signInWithPopup(auth, provider);
+    }
+    return auth.currentUser ? await auth.currentUser.getIdToken() : null;
+  }
+
+  async function handleReview() {
     setReviewed(false);
-    setTimeout(() => {
-      // Highlight only the first word (yellow), then show the same word again (green), then the rest (no highlight)
-      const match = input.match(/\S+/);
+    setLoading(true);
+    try {
+      const idToken = await getIdTokenOrSignIn();
+      if (!idToken) throw new Error("Authentication failed");
+      const res = await fetch("http://localhost:55000/api/proofread", {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${idToken}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ text: input }),
+      });
+      if (!res.ok) throw new Error("API error");
+      const data = await res.json();
+      // Transform API suggestions to our highlight format
       let result = [];
-      if (match) {
-        const firstWord = match[0];
-        const rest = input.slice(firstWord.length);
-        result.push({ type: "original", text: firstWord }); // yellow
-        result.push({ type: "suggestion", text: firstWord, id: 0 }); // green
-        result.push({ type: "plain", text: rest }); // no highlight
-      } else {
-        result.push({ type: "plain", text: input });
+      let lastIdx = 0;
+      for (const s of data.suggestions) {
+        if (s.start > lastIdx) {
+          result.push({ type: "plain", text: data.original_text.slice(lastIdx, s.start) });
+        }
+        result.push({ type: "original", text: s.original });
+        result.push({ type: "suggestion", text: s.suggested, id: Math.random() });
+        lastIdx = s.end;
+      }
+      if (lastIdx < data.original_text.length) {
+        result.push({ type: "plain", text: data.original_text.slice(lastIdx) });
       }
       setSuggestions(result);
       setReviewed(true);
-    }, 1200);
+    } catch (e) {
+      alert("Failed to proofread: " + (e as Error).message);
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (
