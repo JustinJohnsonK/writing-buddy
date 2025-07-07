@@ -83,7 +83,7 @@ export function ReviewResult({ input, suggestions, onBack }: { input: string; su
             break;
           }
         }
-        const res = await fetch("http://localhost:55000/api/modify", {
+        const res = await fetch("/api/modify", {
           method: "POST",
           headers: {
             "Authorization": `Bearer ${idToken}`,

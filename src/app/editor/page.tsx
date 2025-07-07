@@ -25,7 +25,7 @@ export default function EditorPage() {
     try {
       const idToken = await getIdTokenOrSignIn();
       if (!idToken) throw new Error("Authentication failed");
-      const res = await fetch("http://localhost:55000/api/proofread", {
+      const res = await fetch("/api/proofread", {
         method: "POST",
         headers: {
           "Authorization": `Bearer ${idToken}`,
@@ -64,7 +64,7 @@ export default function EditorPage() {
           <span className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-gradient-to-br from-blue-400 to-purple-400 shadow-md">
             <span className="text-white text-2xl font-bold">✍️</span>
           </span>
-          <span className="font-extrabold text-2xl text-blue-700 tracking-tight drop-shadow-sm select-none">Writing Buddy</span>
+          <span className="font-extrabold text-2xl text-blue-700 tracking-tight drop-shadow-sm select-none">WritingBuddies</span>
         </div>
         <UserProfileDropdown />
       </header>
