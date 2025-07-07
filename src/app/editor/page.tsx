@@ -1,15 +1,14 @@
 "use client";
 import { useState } from "react";
 import { UserProfileDropdown } from "../../components/UserProfileDropdown";
-import { ReviewResult } from "../../components/ReviewResult";
+import { ReviewResult, Suggestion } from "../../components/ReviewResult";
 import { getFirebaseAuth } from "../../lib/firebase";
 import { signInWithPopup, GoogleAuthProvider } from "firebase/auth";
 
 export default function EditorPage() {
   const [input, setInput] = useState("");
   const [reviewed, setReviewed] = useState(false);
-  const [suggestions, setSuggestions] = useState<any[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
 
   async function getIdTokenOrSignIn() {
     const auth = getFirebaseAuth();
@@ -23,7 +22,6 @@ export default function EditorPage() {
 
   async function handleReview() {
     setReviewed(false);
-    setLoading(true);
     try {
       const idToken = await getIdTokenOrSignIn();
       if (!idToken) throw new Error("Authentication failed");
@@ -38,14 +36,14 @@ export default function EditorPage() {
       if (!res.ok) throw new Error("API error");
       const data = await res.json();
       // Transform API suggestions to our highlight format
-      let result = [];
+      const result: Suggestion[] = [];
       let lastIdx = 0;
       for (const s of data.suggestions) {
         if (s.start > lastIdx) {
           result.push({ type: "plain", text: data.original_text.slice(lastIdx, s.start) });
         }
         result.push({ type: "original", text: s.original });
-        result.push({ type: "suggestion", text: s.suggested, id: Math.random() });
+        result.push({ type: "suggestion", text: s.suggested });
         lastIdx = s.end;
       }
       if (lastIdx < data.original_text.length) {
@@ -55,8 +53,6 @@ export default function EditorPage() {
       setReviewed(true);
     } catch (e) {
       alert("Failed to proofread: " + (e as Error).message);
-    } finally {
-      setLoading(false);
     }
   }
 

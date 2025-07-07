@@ -3,7 +3,16 @@ import { useState, useRef } from "react";
 import { getFirebaseAuth } from "../lib/firebase";
 import { signInWithPopup, GoogleAuthProvider } from "firebase/auth";
 
-export function ReviewResult({ input, suggestions, onBack }: { input: string; suggestions: any[]; onBack: () => void }) {
+// Suggestion type for review highlights
+export type Suggestion = {
+  type: "original" | "suggestion" | "plain";
+  text: string;
+  accepted?: boolean;
+  rejected?: boolean;
+  modified?: boolean;
+};
+
+export function ReviewResult({ input, suggestions, onBack }: { input: string; suggestions: Suggestion[]; onBack: () => void }) {
   // Track accept/reject/modify state for each suggestion
   const [results, setResults] = useState(suggestions);
   const [modifyIdx, setModifyIdx] = useState<number | null>(null);
@@ -65,7 +74,8 @@ export function ReviewResult({ input, suggestions, onBack }: { input: string; su
         const idToken = await getIdTokenOrSignIn();
         if (!idToken) throw new Error("Authentication failed");
         // Find the original/yellow for this green
-        let start = 0, end = 0, original = input;
+        let start = 0, end = 0;
+        const original = input;
         for (let i = modifyIdx - 1; i >= 0; i--) {
           if (results[i].type === "original") {
             start = original.indexOf(results[i].text);
