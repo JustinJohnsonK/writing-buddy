@@ -1,19 +1,43 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { UserProfileDropdown } from "../../components/UserProfileDropdown";
 import { ReviewResult, Suggestion } from "../../components/ReviewResult";
 import { getFirebaseAuth } from "../../lib/firebase";
-import { signInWithPopup, GoogleAuthProvider } from "firebase/auth";
+import { useRouter } from "next/navigation";
+import { signInWithPopup, GoogleAuthProvider, onAuthStateChanged } from "firebase/auth";
 
 export default function EditorPage() {
+  const router = useRouter();
   const [input, setInput] = useState("");
   const [reviewed, setReviewed] = useState(false);
   const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
+  const [authChecked, setAuthChecked] = useState(false);
+
+  // Persist input to localStorage
+  useEffect(() => {
+    const saved = localStorage.getItem("editorInput");
+    if (saved) setInput(saved);
+  }, []);
+  useEffect(() => {
+    localStorage.setItem("editorInput", input);
+  }, [input]);
+
+  // Redirect to / if not authenticated
+  useEffect(() => {
+    const auth = getFirebaseAuth();
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (!user) {
+        router.replace("/");
+      } else {
+        setAuthChecked(true);
+      }
+    });
+    return () => unsubscribe();
+  }, [router]);
 
   async function getIdTokenOrSignIn() {
     const auth = getFirebaseAuth();
     if (!auth.currentUser) {
-      // Prompt Google sign-in
       const provider = new GoogleAuthProvider();
       await signInWithPopup(auth, provider);
     }
@@ -55,6 +79,8 @@ export default function EditorPage() {
       alert("Failed to proofread: " + (e as Error).message);
     }
   }
+
+  if (!authChecked) return null;
 
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-br from-blue-100 to-purple-200">
