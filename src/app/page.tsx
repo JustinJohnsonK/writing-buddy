@@ -18,7 +18,7 @@ export default function Home() {
       const provider = new GoogleAuthProvider();
       await signInWithPopup(auth, provider);
       router.push("/editor");
-    } catch (e) {
+    } catch {
       alert("Google sign-in failed. Please try again.");
     }
   }
