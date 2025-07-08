@@ -7,6 +7,8 @@ import { signInWithPopup, GoogleAuthProvider } from "firebase/auth";
 export type Suggestion = {
   type: "original" | "suggestion" | "plain";
   text: string;
+  start?: number;
+  end?: number;
   accepted?: boolean;
   rejected?: boolean;
   modified?: boolean;
@@ -22,15 +24,30 @@ export function ReviewResult({ input, suggestions, onBack }: { input: string; su
   const [dropdownIdx, setDropdownIdx] = useState<number | null>(null);
 
   function handleAccept(idx: number) {
-    // Accept: remove the yellow (original) before, keep green (suggestion) as plain text
     setResults(prev => {
       const newResults = [...prev];
       if (idx > 0 && newResults[idx - 1].type === "original" && newResults[idx].type === "suggestion") {
-        // Remove yellow
+        const originalText = newResults[idx - 1].text;
+        const suggestionText = newResults[idx].text;
+        const diff = suggestionText.length - originalText.length;
+        // Remove yellow (original)
         newResults.splice(idx - 1, 1);
-        // Remove green highlight
+        // Remove green highlight, replace with plain text
         newResults[idx - 1] = { ...newResults[idx - 1], type: "plain", accepted: undefined, rejected: undefined };
-        // Remove dropdown
+        // Update start/end for all subsequent suggestions
+        const offset = diff;
+        for (let i = idx; i < newResults.length; i++) {
+          if (
+            typeof newResults[i].start === "number" &&
+            typeof newResults[i].end === "number"
+          ) {
+            newResults[i] = {
+              ...newResults[i],
+              start: (newResults[i].start ?? 0) + offset,
+              end: (newResults[i].end ?? 0) + offset,
+            };
+          }
+        }
         setDropdownIdx(null);
         return newResults;
       }
