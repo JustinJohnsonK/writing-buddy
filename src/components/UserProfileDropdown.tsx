@@ -17,13 +17,11 @@ export function UserProfileDropdown() {
       >
         {/* Character icon (SVG or emoji) */}
         <span className="w-6 h-6 flex items-center justify-center rounded-full bg-blue-200">
-          {/* Example SVG user icon */}
           <svg width="20" height="20" fill="none" viewBox="0 0 24 24">
             <circle cx="12" cy="8" r="4" fill="#2563eb"/>
             <path d="M4 20c0-2.667 3.333-4 8-4s8 1.333 8 4" fill="#2563eb" />
           </svg>
         </span>
-        <span className="font-semibold text-blue-700">Account</span>
         <svg width="20" height="20" fill="none" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5" stroke="#2563eb" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
       </button>
       {open && (

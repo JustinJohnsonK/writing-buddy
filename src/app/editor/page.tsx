@@ -5,7 +5,6 @@ import { ReviewResult, Suggestion } from "../../components/ReviewResult";
 import { getFirebaseAuth } from "../../lib/firebase";
 import { useRouter } from "next/navigation";
 import { onAuthStateChanged } from "firebase/auth";
-import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
 
 export default function EditorPage() {
   const router = useRouter();
@@ -25,12 +24,12 @@ export default function EditorPage() {
     localStorage.setItem("editorInput", input);
   }, [input]);
 
-  // Redirect to / if not authenticated
+  // Redirect to /login if not authenticated
   useEffect(() => {
     const auth = getFirebaseAuth();
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (!user) {
-        router.replace("/");
+        router.replace("/login");
       } else {
         setIsAuthenticated(true);
         setAuthChecked(true);
@@ -39,12 +38,8 @@ export default function EditorPage() {
     return () => unsubscribe();
   }, [router]);
 
-  async function getIdTokenOrSignIn() {
+  async function getIdToken() {
     const auth = getFirebaseAuth();
-    if (!auth.currentUser) {
-      const provider = new GoogleAuthProvider();
-      await signInWithPopup(auth, provider);
-    }
     return auth.currentUser ? await auth.currentUser.getIdToken() : null;
   }
 
@@ -52,7 +47,7 @@ export default function EditorPage() {
     setLoading(true);
     setReviewed(false);
     try {
-      const idToken = await getIdTokenOrSignIn();
+      const idToken = await getIdToken();
       if (!idToken) throw new Error("Authentication failed");
       const res = await fetch("/api/proofread", {
         method: "POST",
