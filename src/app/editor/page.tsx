@@ -4,7 +4,8 @@ import { UserProfileDropdown } from "../../components/UserProfileDropdown";
 import { ReviewResult, Suggestion } from "../../components/ReviewResult";
 import { getFirebaseAuth } from "../../lib/firebase";
 import { useRouter } from "next/navigation";
-import { signInWithPopup, GoogleAuthProvider, onAuthStateChanged } from "firebase/auth";
+import { onAuthStateChanged } from "firebase/auth";
+import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
 
 export default function EditorPage() {
   const router = useRouter();
@@ -12,6 +13,7 @@ export default function EditorPage() {
   const [reviewed, setReviewed] = useState(false);
   const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
   const [authChecked, setAuthChecked] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [loading, setLoading] = useState(false);
 
   // Persist input to localStorage
@@ -30,6 +32,7 @@ export default function EditorPage() {
       if (!user) {
         router.replace("/");
       } else {
+        setIsAuthenticated(true);
         setAuthChecked(true);
       }
     });
@@ -84,7 +87,13 @@ export default function EditorPage() {
     }
   }
 
-  if (!authChecked) return null;
+  // Only render after auth check
+  if (!authChecked) {
+    return null; // or a loader
+  }
+  if (!isAuthenticated) {
+    return null; // Prevents rendering anything if not authenticated
+  }
 
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-br from-blue-100 to-purple-200">
