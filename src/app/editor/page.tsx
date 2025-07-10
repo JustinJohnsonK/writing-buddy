@@ -104,39 +104,37 @@ export default function EditorPage() {
       </header>
       {/* Main */}
       <main className="flex-1 flex flex-col items-center justify-center p-4">
-        {!reviewed ? (
-          <div className="w-full max-w-2xl flex flex-col items-center">
-            <div className="w-full max-w-3xl bg-white/40 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/30 p-8 flex flex-col items-center transition-all">
-              <textarea
-                className="w-full h-[75vh] min-h-[300px] rounded-3xl shadow-xl p-8 text-lg bg-white/70 backdrop-blur-lg border border-white/30 focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all resize-none mb-8 placeholder:text-gray-400 text-black font-medium"
-                placeholder="Paste or write your text here..."
-                value={input}
-                onChange={e => setInput(e.target.value)}
-                style={{maxWidth: '100%'}}
-              />
-              <button
-                onClick={handleReview}
-                disabled={loading}
-                className={`w-full flex items-center justify-center gap-2 bg-gradient-to-r from-pink-500 to-blue-500 text-white font-bold py-3 rounded-2xl shadow-lg hover:scale-105 transition-all mb-2 ${loading ? "opacity-60 cursor-not-allowed" : ""}`}
-              >
-                {loading ? (
-                  <span className="flex items-center gap-2">
-                    Loading
-                    <span className="animate-pulse">...</span>
-                  </span>
-                ) : (
-                  "Review my text"
-                )}
-              </button>
-            </div>
-          </div>
-        ) : (
-          <div className="w-full max-w-2xl flex flex-col items-center">
-            <div className="w-full bg-white/40 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/30 p-8 flex flex-col items-center transition-all">
+        <div className="w-full max-w-2xl flex flex-col items-center">
+          <div className="w-full max-w-3xl bg-white/40 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/30 p-8 flex flex-col items-center transition-all">
+            {!reviewed ? (
+              <>
+                <textarea
+                  className="w-full h-[75vh] min-h-[300px] rounded-3xl shadow-xl p-8 text-lg bg-white/70 backdrop-blur-lg border border-white/30 focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all resize-none mb-8 placeholder:text-gray-400 text-black font-medium"
+                  placeholder="Paste or write your text here..."
+                  value={input}
+                  onChange={e => setInput(e.target.value)}
+                  style={{maxWidth: '100%'}}
+                />
+                <button
+                  onClick={handleReview}
+                  disabled={loading || !input.trim()}
+                  className={`w-full flex items-center justify-center gap-2 bg-gradient-to-r from-pink-500 to-blue-500 text-white font-bold py-3 rounded-2xl shadow-lg hover:scale-105 transition-all mb-2 ${loading || !input.trim() ? "opacity-60 cursor-not-allowed" : ""}`}
+                >
+                  {loading ? (
+                    <span className="flex items-center gap-2">
+                      Loading
+                      <span className="animate-pulse">...</span>
+                    </span>
+                  ) : (
+                    "Review my text"
+                  )}
+                </button>
+              </>
+            ) : (
               <ReviewResult input={input} suggestions={suggestions} onBack={() => setReviewed(false)} />
-            </div>
+            )}
           </div>
-        )}
+        </div>
       </main>
     </div>
   );
