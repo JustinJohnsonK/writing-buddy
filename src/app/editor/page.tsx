@@ -12,6 +12,7 @@ export default function EditorPage() {
   const [reviewed, setReviewed] = useState(false);
   const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
   const [authChecked, setAuthChecked] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   // Persist input to localStorage
   useEffect(() => {
@@ -45,6 +46,7 @@ export default function EditorPage() {
   }
 
   async function handleReview() {
+    setLoading(true);
     setReviewed(false);
     try {
       const idToken = await getIdTokenOrSignIn();
@@ -77,6 +79,8 @@ export default function EditorPage() {
       setReviewed(true);
     } catch (e) {
       alert("Failed to proofread: " + (e as Error).message);
+    } finally {
+      setLoading(false);
     }
   }
 
@@ -107,11 +111,18 @@ export default function EditorPage() {
                 style={{maxWidth: '100%'}}
               />
               <button
-                className="mt-2 px-10 py-5 rounded-2xl bg-red-200 text-red-700 font-bold text-xl shadow-lg hover:scale-105 transition-all"
                 onClick={handleReview}
-                disabled={!input.trim()}
+                disabled={loading}
+                className={`w-full flex items-center justify-center gap-2 bg-gradient-to-r from-pink-500 to-blue-500 text-white font-bold py-3 rounded-2xl shadow-lg hover:scale-105 transition-all mb-2 ${loading ? "opacity-60 cursor-not-allowed" : ""}`}
               >
-                Review my text
+                {loading ? (
+                  <span className="flex items-center gap-2">
+                    Loading
+                    <span className="animate-pulse">...</span>
+                  </span>
+                ) : (
+                  "Review my text"
+                )}
               </button>
             </div>
           </div>
