@@ -2,6 +2,7 @@
 import { useRouter } from "next/navigation";
 import { getFirebaseAuth } from "../lib/firebase";
 import { signInWithPopup, GoogleAuthProvider } from "firebase/auth";
+import Image from "next/image";
 
 export default function Home() {
   const router = useRouter();
@@ -41,7 +42,14 @@ export default function Home() {
       </div>
       {/* Glassy box */}
       <div className="relative z-10 flex flex-col items-center justify-center bg-white/40 backdrop-blur-xl rounded-3xl shadow-2xl p-10 w-full max-w-md border border-white/30">
-        <h1 className="text-3xl font-extrabold mb-6 text-gray-800 drop-shadow">WritingBuddies</h1>
+        <div className="flex flex-col items-center gap-4 mb-6">
+          <span className="inline-flex items-center justify-center w-16 h-32 rounded-full bg-gradient-to-br from-white-400 to-grey-400 shadow-md overflow-hidden">
+            <Image src="/writing-buddies-logo.png" alt="Logo" width={64} height={128} priority />
+          </span>
+          <span className="select-none">
+            <Image src="/writing-buddies-writing.png" alt="WritingBuddies" height={40} width={200} priority style={{height: 40, width: 'auto'}} />
+          </span>
+        </div>
         <button
           onClick={handleGoogleSignIn}
           className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-pink-500 to-blue-500 text-white font-bold py-3 rounded-2xl shadow-lg hover:scale-105 transition-all mb-2"

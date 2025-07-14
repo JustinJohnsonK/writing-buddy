@@ -4,6 +4,7 @@ import { getFirebaseAuth } from "../../lib/firebase";
 import { useRouter } from "next/navigation";
 import { onAuthStateChanged } from "firebase/auth";
 import { signOut } from "firebase/auth";
+import Image from "next/image";
 
 type UserProfile = {
   id: string;
@@ -72,10 +73,12 @@ export default function ProfilePage() {
       {/* Header */}
       <header className="flex justify-between items-center px-6 py-4 bg-white/70 backdrop-blur-xl shadow-lg rounded-b-3xl border-b border-blue-100/60 ring-1 ring-blue-100/60" style={{boxShadow: '0 8px 32px 0 rgba(0,0,0,0.08)'}}>
         <div className="flex items-center gap-3">
-          <span className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-gradient-to-br from-blue-400 to-purple-400 shadow-md">
-            <span className="text-white text-2xl font-bold">✍️</span>
+          <span className="inline-flex items-center justify-center w-10 h-20 rounded-full bg-gradient-to-br from-white-400 to-grey-400 shadow-md overflow-hidden">
+            <Image src="/writing-buddies-logo.png" alt="Logo" width={40} height={80} priority />
           </span>
-          <span className="font-extrabold text-2xl text-blue-700 tracking-tight drop-shadow-sm select-none">WritingBuddies</span>
+          <span className="select-none">
+            <Image src="/writing-buddies-writing.png" alt="WritingBuddies" height={32} width={160} priority style={{height: 32, width: 'auto'}} />
+          </span>
         </div>
         <div className="flex items-center gap-4">
           <button
